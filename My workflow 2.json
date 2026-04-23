@@ -1,0 +1,911 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Jarvis",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Credential",
+                "value": "true"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -416,
+        -240
+      ],
+      "id": "f97dc16a-e01d-4ada-b162-ba2c9184d34e",
+      "name": "Webhook",
+      "webhookId": "ab898508-6529-4378-9115-4b251d17eb83"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are JARVIS, an AI assistant.\n\nYour job is to classify the user request STRICTLY.\n\nRules:\n- If the request is about EMAIL → gmail = true ONLY\n- If the request is about EVENTS / MEETINGS → calendar = true ONLY\n- If the request is about SEARCH → websearch = true ONLY\n\n- NEVER set multiple tools to true unless absolutely necessary\n- For email sending → action = \"send\"\n- For reading emails → action = \"read\"\n- For creating events → action = \"create\"\n- For searching → action = \"search\"\n\nUser message:\n{{$json[\"message\"]}}\n\nReturn ONLY JSON:\n\n{\n  \"calendar\": false,\n  \"gmail\": false,\n  \"websearch\": false,\n  \"action\": \"\",\n  \"final_query\": \"\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -192,
+        -240
+      ],
+      "id": "f857c957-e6a8-4010-9813-ee26b3aad875",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -120,
+        -16
+      ],
+      "id": "7b744911-51a7-4d0c-9680-634ea1246908",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "adx9y7XWEu2Hw7I7",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2fa22c31-0cb3-4807-be7c-21f16f68648a",
+              "leftValue": "=JSON.parse($json[\"output\"]).gmail",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        -240
+      ],
+      "id": "25f5055e-5239-49e8-b03e-be60d5218fef",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3d9231cb-fbea-4c70-bb1d-bef14d7677ad",
+              "leftValue": "=JSON.parse($json[\"output\"]).websearch",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        204
+      ],
+      "id": "85e46ee6-5efb-443a-bd02-81852e8249a0",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8ab25725-769e-4119-941f-9731a1fa49e8",
+              "leftValue": "=$json[\"calendar\"]",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "5c9f0178-4d5e-4062-b65c-184d966aaf49",
+              "leftValue": "=$json[\"action\"]",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        -632
+      ],
+      "id": "b5cdbb7c-1db5-4637-8d2c-28a5bce4be5b",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4c636eab-7f2c-4389-9e00-a102ee63b710",
+              "leftValue": "={{ JSON.parse($json[\"output\"]).action }}",
+              "rightValue": "read",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        -240
+      ],
+      "id": "3069943a-8ae2-4ad2-b0dd-ea27d77aee6c",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json[\"email\"]}}",
+        "subject": "={{$json[\"subject\"]}}",
+        "emailType": "text",
+        "message": "={{$json[\"body\"]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        -92
+      ],
+      "id": "ad76e55c-7e33-4d7c-adef-094424d378be",
+      "name": "Send a message",
+      "webhookId": "f4050698-d54a-4a69-95d3-7b4696ed214f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "d1wIRLDxU0A0L6Bf",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 7,
+        "filters": {
+          "includeSpamTrash": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        -388
+      ],
+      "id": "2a689a7d-6a80-4f52-873b-15969a978f1f",
+      "name": "Get many messages",
+      "webhookId": "dedf27ff-1573-4bd8-8887-51b84c6b7ac0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "d1wIRLDxU0A0L6Bf",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Compose an email based on this request:\n\n{{ JSON.parse($json[\"output\"]).final_query }}\n\nReturn ONLY JSON:\n{\n  \"email\": \"recipient@example.com\",\n  \"subject\": \"subject line\",\n  \"body\": \"email content\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        736,
+        -196
+      ],
+      "id": "29bf6932-9bff-46b6-83c5-b830a72883ac",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "responsesApiEnabled": "={{ true }}",
+        "builtInTools": {
+          "webSearch": {
+            "searchContextSize": "medium"
+          }
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        808,
+        28
+      ],
+      "id": "4e573d43-6fda-44f3-8b92-969f0d2ee65b",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "adx9y7XWEu2Hw7I7",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "725da720-4643-4ef2-87a8-5e3171a9ba9c",
+              "name": "email",
+              "value": "={{ JSON.parse($json[\"output\"]).email }}",
+              "type": "string"
+            },
+            {
+              "id": "8a8af26d-e4b6-4544-8c50-78422f355a56",
+              "name": "subject",
+              "value": "={{ JSON.parse($json[\"output\"]).subject }}",
+              "type": "string"
+            },
+            {
+              "id": "adce6fbf-9fa9-470c-90b5-2da6e273a0ca",
+              "name": "body",
+              "value": "={{ JSON.parse($json[\"output\"]).body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1088,
+        -92
+      ],
+      "id": "3317436c-e5c1-4aa9-8322-36ccb3d2e132",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract event details from this:\n\n{{ JSON.parse($json[\"output\"]).final_query }}\n\nReturn ONLY JSON:\n{\n  \"title\": \"\",\n  \"start\": \"\",\n  \"end\": \"\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        384,
+        -736
+      ],
+      "id": "9b3e5a85-b63c-4d56-9309-0762837c40ae",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "92e91b27-3b13-4b75-b40b-d19c47ef9d59",
+              "name": "title",
+              "value": "={{ JSON.parse($json[\"output\"]).title }}",
+              "type": "string"
+            },
+            {
+              "id": "8b2dc669-b69e-4ad1-845c-a3b7d7809abb",
+              "name": "start",
+              "value": "={{ JSON.parse($json[\"output\"]).start }}",
+              "type": "string"
+            },
+            {
+              "id": "f1889041-8abd-4350-bc2a-8f08724284e5",
+              "name": "end",
+              "value": "={{ JSON.parse($json[\"output\"]).end }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        -632
+      ],
+      "id": "2b4b678b-3801-4619-99e4-a107c517b4dc",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "ajayreddymedam36@gmail.com",
+          "mode": "list",
+          "cachedResultName": "ajayreddymedam36@gmail.com"
+        },
+        "start": "={{$json[\"start\"]}}",
+        "end": "={{$json[\"end\"]}}",
+        "additionalFields": {
+          "summary": "={{$json[\"title\"]}}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        -632
+      ],
+      "id": "d69ad5db-a2ed-424c-b004-6b749473cfe1",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "E60qYQvAx72GLXVs",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        456,
+        -512
+      ],
+      "id": "66c2e6ab-a523-4008-8929-a32b7bfc274d",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "adx9y7XWEu2Hw7I7",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour",
+              "minute": 5
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "ajayreddymedam36@gmail.com",
+          "mode": "list",
+          "cachedResultName": "ajayreddymedam36@gmail.com"
+        },
+        "triggerOn": "eventStarted",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        416,
+        -944
+      ],
+      "id": "a6351b02-59fc-416c-a688-42567dd90708",
+      "name": "Google Calendar Trigger",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "E60qYQvAx72GLXVs",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      reply: `Reminder: You have ${$json.summary} now`\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        -944
+      ],
+      "id": "63b1407f-387d-4351-8a00-fe4e8c2fa7b1",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract the search query from this:\n\n{{ JSON.parse($json[\"output\"]).final_query }}\n\nReturn ONLY JSON:\n{\n  \"query\": \"\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        400,
+        160
+      ],
+      "id": "3c195984-2999-44c1-b94c-361a7d564730",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        456,
+        428
+      ],
+      "id": "99099ee6-aa0c-4dfd-9b0b-081eac61ba42",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "adx9y7XWEu2Hw7I7",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.duckduckgo.com/?q={{ JSON.parse($json[\"output\"]).query }}&format=json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        800,
+        204
+      ],
+      "id": "24abb79a-c6f6-4a60-8476-110c27b453b0",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json;\n\nreturn [\n  {\n    json: {\n      reply: data.AbstractText || data.RelatedTopics?.[0]?.Text || \"No results found\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        204
+      ],
+      "id": "e3ec08e3-465a-47c7-9ae3-132cc228ab29",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1296,
+        -640
+      ],
+      "id": "794cf9aa-96bd-4386-a0fd-1834abd520ce",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        944,
+        -944
+      ],
+      "id": "c0b93244-7cec-4be9-b0b8-aee3f322bbd8",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1008,
+        -384
+      ],
+      "id": "ec7cfae3-667f-46d1-9921-068a4ccf8a1b",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1520,
+        -96
+      ],
+      "id": "18dd09f5-4501-4f56-b0db-769b69351b31",
+      "name": "Respond to Webhook3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1296,
+        208
+      ],
+      "id": "429a431d-114b-4b4a-9069-11df53ea6778",
+      "name": "Respond to Webhook4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "507e8cba-a253-45df-8531-ece76b8a9ec9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "713052e85d509b70b29c7685c0353056392601bd604504f53f4c0d9e5abde693"
+  },
+  "id": "Zuf4qwUfKzp0iopP",
+  "tags": []
+}
